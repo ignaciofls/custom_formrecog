@@ -1,4 +1,4 @@
-# custom_read_api
+# custom_formrecog
 ---
 Description:
 - Form Recognizer API evolves quickly to increase transcription accuracy, add new supported languages and/or simply onboard new features. custom_read_api is an Azure Cognitive Search skill to integrate Azure Form Recognizer Read API within an Azure Cognitive Search skillset. By default the in built OCR skill uses the latest GA version of Read API (which does not included latest and greatest developments) so this skill enables fresh previews to be leveraged.
