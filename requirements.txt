@@ -5,3 +5,4 @@
 azure-functions
 requests
 pybase64
+azure-ai-formrecognizer==3.2.0b5
