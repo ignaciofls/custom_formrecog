@@ -2,11 +2,12 @@ import logging
 import json
 import os
 import logging
-import time, requests
 from json import JSONEncoder
 import os
 import azure.functions as func
 import base64
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.core.credentials import AzureKeyCredential
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
@@ -41,37 +42,22 @@ def compose_response(json_data):
 
 def read(endpoint, key, recordId, data):
     try:
-        #check if length is divisible by 4
+        #base64 padding can be tricky when coming from Java. check if length is divisible by 4, add to make it multiple of 4
+        #logging.info("b64 docUrl: " + data["Url"])
         if len(data["Url"]) % 4 == 0:
             docUrl = base64.b64decode(data["Url"]).decode('utf-8')[:-1] + data["SasToken"]
-        else:
+        elif len(data["Url"]) % 4 == 1:
             docUrl = base64.b64decode(data["Url"][:-1]).decode('utf-8') + data["SasToken"]
-        body = {"urlSource": docUrl}
-        header = {'Ocp-Apim-Subscription-Key': key,
-        'Content-Type': 'application/json'
-                } 
-        body_json = json.dumps(body)
-        #FR API works in two steps, first you post the job, afterwards you get the result
-        response_job = requests.post(endpoint, data = body_json, headers = header)
-        logging.info("response_job is: " + str(response_job))
-        logging.info('Wait for FR API to process the document')
-        time.sleep(5) # Let some time to process the job, you could do active polling 
-        urltoretrieveresult = response_job.headers["Operation-Location"]
-        response = requests.get(urltoretrieveresult, None, headers=header)
-        dict=json.loads(response.text)
-        i=0
-        #sometimes the Read processing time will be longer, in that case we need to try again after a while
-        while dict["status"] != "Succeeded" and i<10:
-            time.sleep(3)
-            response = requests.get(urltoretrieveresult, None, headers=header)
-            dict=json.loads(response.text)
-            logging.info('Read API processing time is longer than expected, retrying...')
-            time.sleep(3)
-            i=i+1
-        read_result=dict['analyzeResult']['content']
+        elif len(data["Url"]) % 4 == 2:
+            docUrl = base64.b64decode(data["Url"]+"=").decode('utf-8') + data["SasToken"]
+        elif len(data["Url"]) % 4 == 3:
+            docUrl = base64.b64decode(data["Url"]+"==").decode('utf-8')[:-1]+ data["SasToken"]
+        document_analysis_client = DocumentAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+        poller = document_analysis_client.begin_analyze_document_from_url("prebuilt-read", docUrl)
+        result = poller.result()
         output_record = {
             "recordId": recordId,
-            "data": {"text": read_result}
+            "data": {"text": result.content}
         }
 
     except Exception as error:
