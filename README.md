@@ -18,7 +18,7 @@ Products:
 2. Create a Python Function in Azure, for example this is a good [starting point](https://docs.microsoft.com/azure/azure-functions/create-first-function-vs-code-python)
 3. Clone this repository
 4. Open the folder in VS Code and deploy the function, find here a [tutorial](https://docs.microsoft.com/azure/search/cognitive-search-custom-skill-python)
-5. Fill your Functions appsettings with the details from your deployment ('FR_ENDPOINT', 'FR_ENDPOINT_KEY' with the info you got in Azure Portal) (ie FR_ENDPOINT can be something like https://westeurope.api.cognitive.microsoft.com/formrecognizer/documentModels/prebuilt-read:analyze?api-version=2022-06-30-preview) 
+5. Fill your Functions appsettings with the details from your deployment ('FR_ENDPOINT', 'FR_ENDPOINT_KEY' with the info you got in Azure Portal) (ie FR_ENDPOINT can be something like https://westeurope.api.cognitive.microsoft.com) 
 6. Add a field in your index where you will dump the enriched entities, more info [here](#sample-index-field-definition)
 7. Add the skill to your skillset as [described below](#sample-skillset-integration)
 8. Add the output field mapping in your indexer as [seen in the sample](#sample-indexer-output-field-mapping)
